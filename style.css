@@ -1,0 +1,13 @@
+#gameGrid{
+    display: grid;
+}
+
+#gameGrid > div{
+    border: solid black 1px;
+    width: 2rem;
+    height: 2rem;
+}
+
+.coloredCell{
+    background-color: black;
+}
