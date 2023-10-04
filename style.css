@@ -1,13 +1,33 @@
 #gameGrid{
     display: grid;
+    position: absolute;
+    left: 50%;
+    top: 2rem;
+}
+
+.gameGrid3{
+    margin-left: -3rem;
+}
+.gameGrid5{
+    margin-left: -5rem;
+}
+.gameGrid10{
+    margin-left: -10rem;
+}
+.gameGrid15{
+    margin-left: -15rem;
 }
 
 #gameGrid > div{
     border: solid black 1px;
     width: 2rem;
     height: 2rem;
+    /* background-color: white; */
+    font-size: 200%;
+    line-height: 2rem;
+    text-align: center;
 }
 
 .coloredCell{
-    background-color: black;
+    background-color: red;
 }
