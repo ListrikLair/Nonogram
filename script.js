@@ -10,12 +10,12 @@ const model = {
         lives: 3,
     },
     puzzle: {
-        answer: [
-
+        answer: [],
+        yourAnswer: [],
+        topRowNumbers: [
+            [], [], [], [], [], [], [], [], [], [], [], [], [], [], []
         ],
-        yourAnswer: [
-
-        ]
+        leftRowNumbers: []
     }
 }
 
@@ -32,7 +32,7 @@ function updateView() {
 
 function updateDataView() {
     document.getElementById('currentInput').innerHTML = model.data.inputValue;
-    document.getElementById('livesLeft').innerHTML = model.data.lives;
+    document.getElementById('livesLeft').innerHTML = 'Mistakes left: ' + model.data.lives;
 
 }
 
@@ -50,15 +50,25 @@ function createStartPageHtml() {
 
 function createGamePageHtml() {
     app.innerHTML += /*HTML*/`
+    <div id="topRow" style="grid-template-columns: repeat(${model.data.gridSize}, 2rem);">${createTopRowHtml()}</div>
     <div id="gameGrid" style="grid-template-columns: repeat(${model.data.gridSize}, 2rem); grid-template-rows: repeat(${model.data.gridSize}, 2rem);">${createGameHtml()}</div>
     <div>${createButtonHtml()}</div>
     `;
     model.data.newGame = false;
 }
 
+function createTopRowHtml() {
+    let html = '';
+    for (let i = 0; i < model.data.gridSize; i++) {
+        html += /*HTML*/`
+        <div id="topRow${i}">${i}</div>
+        `;
+    } return html;
+}
+
 function createGameHtml() {
     let gameHtml = '';
-    for (i = 0; i < model.data.gridSize * model.data.gridSize; i++) {
+    for (let i = 0; i < model.data.gridSize * model.data.gridSize; i++) {
         gameHtml += /*HTML*/`
         <div id="${i}" onclick="fillCell(${i})"></div>
         `;
@@ -70,7 +80,7 @@ function createButtonHtml() {
     html += /*HTML*/`
         <button onclick="swapColor()">■ / X</button>
         <div id="currentInput">${model.data.inputValue}</div>
-        <div id="livesLeft">${model.data.lives}</div>
+        <div id="livesLeft">Mistakes left: ${model.data.lives}</div>
     `;
     return html;
 }
@@ -83,6 +93,7 @@ function chooseGame(gameSize) {
     updateView();
     randomizeCells();
     document.getElementById('gameGrid').classList.add('gameGrid' + gameSize);
+    document.getElementById('topRow').classList.add('gameGrid' + gameSize);
     updateView();
 }
 
@@ -107,6 +118,7 @@ function fillCell(cellIndex) {
         cellI.style.background = 'white';
         indexInArray = model.puzzle.yourAnswer.indexOf(cellIndex);
         model.puzzle.yourAnswer.splice(indexInArray, 1)
+        checkIfWin();
         return;
     }
     if (model.data.inputValue == 'X') {
@@ -121,7 +133,7 @@ function fillCell(cellIndex) {
 
 function randomizeCells() {
     let cellNumb = (model.data.gridSize * model.data.gridSize) * 0.7;
-    for (i = 0; i < cellNumb; i++) {
+    for (let i = 0; i < cellNumb; i++) {
         let randomCell = Math.floor(Math.random() * (model.data.gridSize * model.data.gridSize));
         document.getElementById(randomCell).classList.add('coloredCell');
         if (model.puzzle.answer.includes(randomCell)) {
@@ -129,6 +141,8 @@ function randomizeCells() {
             model.puzzle.answer.push(randomCell);
         }
     }
+    sortArrays();
+    calculateNumbers();
     updateView();
 }
 
@@ -148,20 +162,20 @@ function checkIfRight(cellIndex) {
     updateDataView();
 }
 
-function sortArrays(){
+function sortArrays() {
     model.puzzle.answer.sort();
     model.puzzle.answer.sort(compareNumbers);
     model.puzzle.yourAnswer.sort();
     model.puzzle.yourAnswer.sort(compareNumbers);
 }
 
-function compareNumbers(a, b){
+function compareNumbers(a, b) {
     return a - b;
 }
 
-function checkIfWin(){
+function checkIfWin() {
     sortArrays();
-    if(model.puzzle.answer.toString() == model.puzzle.yourAnswer.toString()){
+    if (model.puzzle.answer.toString() == model.puzzle.yourAnswer.toString()) {
         alert("You Win");
         resetGame();
     }
@@ -176,4 +190,26 @@ function resetGame() {
     model.puzzle.answer = [];
     model.puzzle.yourAnswer = [];
     updateView();
+}
+
+function calculateNumbers() {
+    for (let i = 0; i < model.data.gridSize; i++) {
+        // if (model.puzzle.answer[i] % model.data.gridSize == i % model.data.gridSize){
+        calculateColumns(i);
+    }
+}
+
+function calculateColumns(columnIndex) {
+    let topRowIndex = 0;
+    for (let i = columnIndex; i < model.data.gridSize * model.data.gridSize; i += model.data.gridSize) {
+        let idNumber = i * model.data.gridSize;
+        if (document.getElementById(idNumber).classList.contains('coloredCell')) {
+            if (model.puzzle.answer.includes((model.puzzle.answer[i]) - model.data.gridSize && i > 0)) {
+                model.puzzle.topRowNumbers[topRowIndex - (model.data.gridSize)] += 1;
+            } else {
+                model.puzzle.topRowNumbers[topRowIndex].push(1);
+            }
+        }
+    }
+    topRowIndex += 1;
 }

@@ -31,3 +31,11 @@
 .coloredCell{
     background-color: red;
 }
+#topRow{
+    display: grid;
+    position: absolute;
+    top: 1rem;
+    left: 50%;
+    height: 4rem;
+    text-align: center;
+}
