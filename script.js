@@ -8,12 +8,13 @@ const model = {
         inputValue: '■',
         newGame: true,
         lives: 3,
+        topRowIndex: 0,
     },
     puzzle: {
         answer: [],
         yourAnswer: [],
         topRowNumbers: [
-            [], [], [], [], [], [], [], [], [], [], [], [], [], [], []
+            [1,1,2,1], [1], [], [], [], [], [], [], [], [], [], [], [], [], []
         ],
         leftRowNumbers: []
     }
@@ -51,6 +52,7 @@ function createStartPageHtml() {
 function createGamePageHtml() {
     app.innerHTML += /*HTML*/`
     <div id="topRow" style="grid-template-columns: repeat(${model.data.gridSize}, 2rem);">${createTopRowHtml()}</div>
+    <div id="leftRow" style="grid-template-rows: repeat(${model.data.gridSize}, 2rem);">${createTopRowHtml()}</div>
     <div id="gameGrid" style="grid-template-columns: repeat(${model.data.gridSize}, 2rem); grid-template-rows: repeat(${model.data.gridSize}, 2rem);">${createGameHtml()}</div>
     <div>${createButtonHtml()}</div>
     `;
@@ -61,7 +63,16 @@ function createTopRowHtml() {
     let html = '';
     for (let i = 0; i < model.data.gridSize; i++) {
         html += /*HTML*/`
-        <div id="topRow${i}">${i}</div>
+        <div id="topRow${i}">${model.puzzle.topRowNumbers[0][i]}</div>
+        `;
+    } return html;
+}
+
+function createLeftRowHtml() {
+    let html = '';
+    for (let i = 0; i < model.data.gridSize; i++) {
+        html += /*HTML*/`
+        <div id="leftRow${i}">${model.puzzle.leftRowNumbers[0][i]}</div>
         `;
     } return html;
 }
@@ -92,8 +103,9 @@ function chooseGame(gameSize) {
     app.innerHTML = '';
     updateView();
     randomizeCells();
-    document.getElementById('gameGrid').classList.add('gameGrid' + gameSize);
-    document.getElementById('topRow').classList.add('gameGrid' + gameSize);
+    document.getElementById('gameGrid', 'topRow', 'leftRow').classList.add('gameGrid' + gameSize);
+    // document.getElementById('topRow').classList.add('gameGrid' + gameSize);
+    // document.getElementById('leftRow').classList.add('gameGrid' + gameSize);
     updateView();
 }
 
@@ -115,7 +127,7 @@ function fillCell(cellIndex) {
     }
     if (cellI.innerHTML != '' || cellI.style.background == 'black') {
         cellI.innerHTML = '';
-        cellI.style.background = 'white';
+        cellI.style.background = '';
         indexInArray = model.puzzle.yourAnswer.indexOf(cellIndex);
         model.puzzle.yourAnswer.splice(indexInArray, 1)
         checkIfWin();
@@ -200,16 +212,15 @@ function calculateNumbers() {
 }
 
 function calculateColumns(columnIndex) {
-    let topRowIndex = 0;
     for (let i = columnIndex; i < model.data.gridSize * model.data.gridSize; i += model.data.gridSize) {
-        let idNumber = i * model.data.gridSize;
+        let idNumber = i + (columnIndex * model.data.gridSize);
         if (document.getElementById(idNumber).classList.contains('coloredCell')) {
             if (model.puzzle.answer.includes((model.puzzle.answer[i]) - model.data.gridSize && i > 0)) {
-                model.puzzle.topRowNumbers[topRowIndex - (model.data.gridSize)] += 1;
+                model.puzzle.topRowNumbers[0][model.data.topRowIndex - (model.data.gridSize)] += 1;
             } else {
-                model.puzzle.topRowNumbers[topRowIndex].push(1);
+                model.puzzle.topRowNumbers[0][model.data.topRowIndex].push(1);
             }
         }
     }
-    topRowIndex += 1;
+    model.data.topRowIndex += 1;
 }
